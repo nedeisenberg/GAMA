@@ -35,8 +35,10 @@ res = .5
 thresh = 1.
 
 weight = 12
-def weight():
-    None
+
+#
+#def weight():
+#    None
 
 cap = cv2.VideoCapture(0)
 
