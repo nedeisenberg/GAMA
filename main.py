@@ -34,7 +34,7 @@ res = .5
 
 thresh = 1.
 
-weight = 12
+weight = 18
 
 #
 #def weight():
@@ -76,7 +76,7 @@ while 1:
         #levels
         3,      \
         #winsize
-        5,      \
+        11,      \
         #iterations
         3,      \
         #poly_n
@@ -97,6 +97,8 @@ while 1:
     flow_x_ = cv2.resize(_flow_x, (0,0), fx = 1/res, fy = 1/res)    
     flow_y_ = cv2.resize(_flow_y, (0,0), fx = 1/res, fy = 1/res)
    # flow_s
+    
+    ####HDR!!!!
     
     #Point Transpose: Index Slice/Combine
         #delineate flow arrays
@@ -125,20 +127,33 @@ while 1:
     shift_y = mod_y+flow_y_linear
     
             #remove outliers    
-    shift_x[(shift_x>total_width-10) & (shift_x<-1*total_width-10)]=0
+    shift_x[(shift_x>total_width-1)]=0
+    shift_x[(shift_x<-1*total_width+1)]=0
+    print shift_x.max()
 
-    shift_y[(shift_y>total_height-10) & (shift_y<-1*total_height-10)]=0
-    
+    shift_y[(shift_y>total_height-1)]=0
+    shift_y[(shift_y<-1*total_height+1)]=0
+    print shift_y.max()
     shift_y_x = np.stack((shift_y, shift_x))
+    
+    
+    #apply gaussian blur
     
     #Revolve
     
     prev = next.copy()
     super = next.copy()
+
+    #print mod_y_x.shape    
     
-    super[(shift_y_x[0,:],shift_y_x[1,:])]  \
-        =                                   \
-        super[(mod_y_x[0,:],mod_y_x[1,:])]  \
+    print mod_y_x[0,:].max()
+    print mod_y_x[1,:].max()
+    print shift_y_x[0,:].max()
+    print shift_y_x[1,:].max()
+    
+    super[(shift_y_x[0,:],shift_y_x[1,:])]      \
+        =                                       \
+            super[(mod_y_x[0,:],mod_y_x[1,:])]  \
 
     cv2.imshow('super',super)
   
