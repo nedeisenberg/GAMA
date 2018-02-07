@@ -84,19 +84,18 @@ while 1:
         #
         1.5,    \
         #
+        #0   )   \
         cv2.OPTFLOW_FARNEBACK_GAUSSIAN)      \
 
         #separate the x and y flows
     _flow_x = flow[:,:,0]
     _flow_y = flow[:,:,1]
     
-        #resize x and y flow arrays to original size
-        #
-        #improve this variety
-        #
+        #hysteresis threshold    
+        
+        #resize x and y flow arrays to original size        
     flow_x_ = cv2.resize(_flow_x, (0,0), fx = 1/res, fy = 1/res)    
     flow_y_ = cv2.resize(_flow_y, (0,0), fx = 1/res, fy = 1/res)
-   # flow_s
     
     ####HDR!!!!
     
@@ -118,23 +117,28 @@ while 1:
 #    
 #   -----~~~~~=====OOOOO00000     -~=O0-~=O0-~=O0-~=O0-~=O0
 
-
-        #join x and y mods
-    mod_y_x = np.stack((mod_y, mod_x))
-
-    
+       
+       
     shift_x = mod_x+flow_x_linear
     shift_y = mod_y+flow_y_linear
     
-            #remove outliers    
-    shift_x[(shift_x>total_width-1)]=0
-    shift_x[(shift_x<-1*total_width+1)]=0
-    print shift_x.max()
+            #join x and y mods
+    mod_y_x = np.stack((mod_y, mod_x))
 
-    shift_y[(shift_y>total_height-1)]=0
-    shift_y[(shift_y<-1*total_height+1)]=0
-    print shift_y.max()
+    
+            #remove outliers    
+    shift_x[(shift_x>total_width-1)]=False
+    shift_x[(shift_x<-1*total_width+1)]=False
+
+    shift_y[(shift_y>total_height-1)]=False
+    shift_y[(shift_y<-1*total_height+1)]=False
+
+    
     shift_y_x = np.stack((shift_y, shift_x))
+    
+    #trim using boolean mask
+    shift_y_x[shift_y_x==mod_y_x]=False
+    mod_y_x[shift_y_x==False]=False
     
     
     #apply gaussian blur
@@ -144,13 +148,7 @@ while 1:
     prev = next.copy()
     super = next.copy()
 
-    #print mod_y_x.shape    
-    
-    print mod_y_x[0,:].max()
-    print mod_y_x[1,:].max()
-    print shift_y_x[0,:].max()
-    print shift_y_x[1,:].max()
-    
+
     super[(shift_y_x[0,:],shift_y_x[1,:])]      \
         =                                       \
             super[(mod_y_x[0,:],mod_y_x[1,:])]  \
